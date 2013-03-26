@@ -1,3 +1,5 @@
+var _ = require('underscore');
+
 var scrapePrintHistory = function(url, callback) {
     var http = require('http')
         , phantomProxy = require('phantom-proxy')
@@ -14,7 +16,28 @@ var scrapePrintHistory = function(url, callback) {
                 if (h1s.length > 0) {
                     h1 = $('h1')[0].innerText;
                 }
-                return JSON.stringify({h1: h1});
+                var scrapedData = {h1: h1};
+
+                var approvedSpan = $('.paragraph.approved');
+                if (approvedSpan.length) {
+                    scrapedData.approved = true;
+                } else {
+                    scrapedData.approved = false;
+                }
+
+                var allLinks = $('a[href]');
+                var votingLinks = _.filter(allLinks, function (elem) {
+                   return elem.indexOf('hlasy.sqw');
+                });//TODO finish links
+                
+                var sectionTitles = $('h2[class="section-title"]');
+                if (sectionTitles[0].innerHTML === "Dokument") {
+                    scrapedData.type = 'document';
+                } else {
+                    scrapedData.type = 'novel';
+                }
+                
+                return JSON.stringify(scrapedData);
             }, function (scraped) {
                 scraped = JSON.parse(scraped);
                 if (scraped.h1) {
@@ -22,7 +45,9 @@ var scrapePrintHistory = function(url, callback) {
                     var printHeading = splitted[0];
                     var printNumber = printHeading.match(/\d+$/)[0];
                     var printName = splitted[1];
-                    callback({number: printNumber, name: printName}) ;
+                    delete scraped.h1;
+                    _.extend(scraped, {number: printNumber, name: printName});
+                    callback(scraped);
                 } else {
                     console.warn("scrape printHistory for " + url + " failed.");
                 }
