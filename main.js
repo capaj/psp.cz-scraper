@@ -1,9 +1,10 @@
-var scrapePrintHistory = function(url, callback) {
-    var http = require('http')
-        , phantomProxy = require('phantom-proxy')
-        , path = require('path');
+var http = require('http')
+    , phantomProxy = require('phantom-proxy')
+    , path = require('path');
 
-    phantomProxy.create({}, function (phantom) {
+var scrapePrintHistory = function(url, callback) {
+
+    phantomProxy.create({'loadImages':'no'}, function (phantom) {
         var page = phantom.page;
 
         page.open(url, function () {
@@ -14,7 +15,25 @@ var scrapePrintHistory = function(url, callback) {
                 if (h1s.length > 0) {
                     h1 = $('h1')[0].innerText;
                 }
-                return JSON.stringify({h1: h1});
+                var state;
+                var states = {
+                    accepted: $('.status.okx').length,     //if accepted there should be one paragraph with class status ok
+                    refused: $('span.mark.terminated').length,
+                    ongoing: $('[class=status]').length
+                };
+                var countCheck = 0;
+                for(var stateName in states)
+                {
+                    if (states[stateName] === 1) {
+                        state = stateName;
+                    }
+                    countCheck += states[stateName];
+                }
+                if (countCheck !== 1) {
+                    console.warn("Exactly one state should be possible, check your input, maybe something has changed.");
+                }
+                // from the previous three, only one should be equal to one
+                return JSON.stringify({h1: h1, state: state});
             }, function (scraped) {
                 scraped = JSON.parse(scraped);
                 if (scraped.h1) {
@@ -22,7 +41,9 @@ var scrapePrintHistory = function(url, callback) {
                     var printHeading = splitted[0];
                     var printNumber = printHeading.match(/\d+$/)[0];
                     var printName = splitted[1];
-                    callback({number: printNumber, name: printName}) ;
+                    var printH = {number: printNumber, name: printName, state:scraped.state};
+                    //accepted, refused, ongoing
+                    callback(printH) ;
                 } else {
                     console.warn("scrape printHistory for " + url + " failed.");
                 }
@@ -31,7 +52,7 @@ var scrapePrintHistory = function(url, callback) {
     });
 };
 
-module.exports = {scrapePrintHistory: scrapePrintHistory}
+module.exports = {scrapePrintHistory: scrapePrintHistory};
 
 
 
