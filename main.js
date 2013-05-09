@@ -1,3 +1,4 @@
+var _ = require('underscore');
 var http = require('http')
     , phantomProxy = require('phantom-proxy')
     , path = require('path');
@@ -30,10 +31,23 @@ var scrapePrintHistory = function(url, callback) {
                     countCheck += states[stateName];
                 }
                 if (countCheck !== 1) {
+                    // from the previous three, only one should be equal to one
                     console.warn("Exactly one state should be possible, check your input, maybe something has changed.");
                 }
-                // from the previous three, only one should be equal to one
-                return JSON.stringify({h1: h1, state: state});
+
+                var allLinks = $('a[href]');
+                var votingLinks = _.filter(allLinks, function (elem) {
+                    return elem.indexOf('hlasy.sqw');
+                });//TODO finish links
+                
+                var output = {h1: h1, state: state};
+                var sectionTitles = $('h2[class="section-title"]');
+                if (sectionTitles[0].innerHTML === "Dokument") {
+                    output.type = 'document';
+                } else {
+                    output.type = 'novel';
+                }
+                return JSON.stringify(output);
             }, function (scraped) {
                 scraped = JSON.parse(scraped);
                 if (scraped.h1) {
@@ -53,9 +67,3 @@ var scrapePrintHistory = function(url, callback) {
 };
 
 module.exports = {scrapePrintHistory: scrapePrintHistory};
-
-
-
-
-
-
