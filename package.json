@@ -20,8 +20,8 @@
         "phantom"
     ],
     "dependencies": {
-        "phantom-proxy": "latest"
-
+        "phantom-proxy": "latest",
+        "underscore": "latest"
     },
     "license": "MIT"
 }
