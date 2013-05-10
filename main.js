@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var utils = require("./utilFns.js");
 var http = require('http')
     , phantomProxy = require('phantom-proxy')
     , path = require('path');
@@ -39,8 +40,20 @@ var scrapePrintHistory = function(url, callback) {
                 var votingLinks = _.filter(allLinks, function (elem) {
                     return elem.indexOf('hlasy.sqw');
                 });//TODO finish links
-                
-                var output = {h1: h1, state: state};
+
+                var output = {
+                    h1: h1,
+                    state: state,
+                    readings: $('strong.highlight').length
+                };
+                var authorLinks = $('div.section-content.simple').find('a');
+                if (authorLinks.length == 0) {
+                    output.authorDescription = $('div.section-content.simple').innerHTML;
+                } else {
+                    output.authorLinks = $.map(authorLinks, function(el){return el.href;})
+                }
+
+
                 var sectionTitles = $('h2[class="section-title"]');
                 if (sectionTitles[0].innerHTML === "Dokument") {
                     output.type = 'document';
@@ -55,6 +68,10 @@ var scrapePrintHistory = function(url, callback) {
                     var printHeading = splitted[0];
                     var printNumber = printHeading.match(/\d+$/)[0];
                     var printName = splitted[1];
+                    if (scraped.authorDescription) {
+                        utils.clipTextBetween(scraped.authorDescription, "<br>", "<p>");
+                    }
+
                     var printH = {number: printNumber, name: printName, state:scraped.state};
                     //accepted, refused, ongoing
                     callback(printH) ;
