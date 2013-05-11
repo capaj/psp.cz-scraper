@@ -1,6 +1,6 @@
 {
     "name": "psp.cz-scraper",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "private": false,
     "author": "capaj <capajj@gmail.com>",
     "description": "scraper for official czech parliament website on PhantomJS",
@@ -21,6 +21,7 @@
     ],
     "dependencies": {
         "phantom-proxy": "latest",
+        "moment": "latest",
         "underscore": "latest"
     },
     "license": "MIT"

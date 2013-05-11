@@ -3,6 +3,9 @@ var utils = require("./utilFns.js");
 var http = require('http')
     , phantomProxy = require('phantom-proxy')
     , path = require('path');
+// constants for scraping dates
+var SHORT_DT_FORMAT = "D. M. YYYY";
+var MWORD_DT_FORMAT = "D. MMMM YYYY";
 
 var scrapePrintHistory = function(url, callback) {
 
@@ -33,7 +36,7 @@ var scrapePrintHistory = function(url, callback) {
                 }
                 if (countCheck !== 1) {
                     // from the previous three, only one should be equal to one
-                    console.warn("Exactly one state should be possible, check your input, maybe something has changed.");
+                    console.warn("Exactly one state should be equal to one, check your input, maybe something has changed.");
                 }
 
                 var allLinks = $('a[href]');
