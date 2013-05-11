@@ -24,7 +24,7 @@ var scrapePrintHistory = function(url, callback) {
                 var states = {
                     accepted: $('.status.okx').length,     //if accepted there should be one paragraph with class status ok
                     refused: $('span.mark.terminated').length,
-                    ongoing: $('[class=status]').length
+                    ongoing: $('[class=status]').length || $('span.mark.current').length
                 };
                 var countCheck = 0;
                 for(var stateName in states)
@@ -34,9 +34,23 @@ var scrapePrintHistory = function(url, callback) {
                     }
                     countCheck += states[stateName];
                 }
+
+                var output = {
+                    h1: h1,
+                    state: state,
+                    readings: $('strong.highlight').length
+                };
+
                 if (countCheck !== 1) {
-                    // from the previous three, only one should be equal to one
+                    // from the previous three, only one should be equal to one, but there are some which don't have
                     console.warn("Exactly one state should be equal to one, check your input, maybe something has changed.");
+                } else {
+                    if (states.ongoing) {
+                        output.nextMeetingWhereScheduledLink = $('[class=status]').find('a')[0].href;
+                    }
+                    if (states.accepted) {
+                        output.publishedInLink = $('.status.okx').find('a')[0].href;
+                    }
                 }
 
 //                var allLinks = $('a[href]');
@@ -44,19 +58,15 @@ var scrapePrintHistory = function(url, callback) {
 //                    return elem.indexOf('hlasy.sqw');
 //                });//TODO finish links
 
-                var output = {
-                    h1: h1,
-                    state: state,
-                    readings: $('strong.highlight').length
-                };
+
                 var authorLinks = $('div.section-content.simple').find('a');
                 if (authorLinks.length == 0) {
-                    output.authorDescription = $('div.section-content.simple').innerHTML;
+                    output.authorDescription = $('div.section-content.simple')[0].textContent;
                 } else {
                     output.authorLinks = $.map(authorLinks, function(el){return el.href;})
                 }
 
-                var sectionTitles = $('h2[class="section-title"]');
+                var sectionTitles = $('h2.section-title');
                 if (sectionTitles[0].innerHTML === "Dokument") {
                     output.type = 'document';
                 } else {
@@ -64,8 +74,8 @@ var scrapePrintHistory = function(url, callback) {
                 }
                 return JSON.stringify(output);
             }, function (scraped) {
-                scraped = JSON.parse(scraped);
-                if (scraped.h1) {
+                if (scraped) {
+                    scraped = JSON.parse(scraped);
                     var splitted = scraped.h1.split(/\r\n|\r|\n/);
                     var printHeading = splitted[0];
                     var printNumber = printHeading.match(/\d+$/)[0];
@@ -74,7 +84,7 @@ var scrapePrintHistory = function(url, callback) {
                         utils.clipTextBetween(scraped.authorDescription, "<br>", "<p>");
                     }
 
-                    var printH = {number: printNumber, name: printName, state:scraped.state};
+                    var printH = {number: printNumber, name: printName, state: scraped.state};
                     //accepted, refused, ongoing
                     callback(printH) ;
                 } else {
