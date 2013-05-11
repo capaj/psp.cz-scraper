@@ -13,7 +13,7 @@ var scrapePrintHistory = function(url, callback) {
         var page = phantom.page;
 
         page.open(url, function () {
-            page.injectJs('jquery.js');
+            page.injectJs('./node_modules/psp.cz-scraper/jquery.js');
             page.evaluate(function () {
                 var h1s = $('h1');
                 var h1;
