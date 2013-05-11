@@ -18,7 +18,7 @@ var scrapePrintHistory = function(url, callback) {
                 var h1s = $('h1');
                 var h1;
                 if (h1s.length > 0) {
-                    h1 = $('h1')[0].innerText;
+                    h1 = h1s[0].innerText;
                 }
                 var state;
                 var states = {
@@ -39,10 +39,10 @@ var scrapePrintHistory = function(url, callback) {
                     console.warn("Exactly one state should be equal to one, check your input, maybe something has changed.");
                 }
 
-                var allLinks = $('a[href]');
-                var votingLinks = _.filter(allLinks, function (elem) {
-                    return elem.indexOf('hlasy.sqw');
-                });//TODO finish links
+//                var allLinks = $('a[href]');
+//                var votingLinks = allLinks.filter(function (elem) {
+//                    return elem.indexOf('hlasy.sqw');
+//                });//TODO finish links
 
                 var output = {
                     h1: h1,
@@ -55,7 +55,6 @@ var scrapePrintHistory = function(url, callback) {
                 } else {
                     output.authorLinks = $.map(authorLinks, function(el){return el.href;})
                 }
-
 
                 var sectionTitles = $('h2[class="section-title"]');
                 if (sectionTitles[0].innerHTML === "Dokument") {
