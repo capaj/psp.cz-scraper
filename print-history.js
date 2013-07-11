@@ -94,7 +94,7 @@ module.exports = function(url, callback) {
                         state: scraped.state,
                         type: scraped.type,
                         readings: scraped.readings,
-                        createdOn: moment.parse(scraped.dateIntroduced, SHORT_DT_FORMAT)
+                        createdOn: moment(scraped.dateIntroduced, SHORT_DT_FORMAT)
                     };
                     //accepted, refused, ongoing
                     callback(printH) ;
