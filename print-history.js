@@ -1,5 +1,10 @@
 var phantomProxy = require('phantom-proxy');
 var utils = require("./utilFns.js");
+var moment = require('moment');
+moment.lang('cz');
+// constants for scraping dates
+var SHORT_DT_FORMAT = "D. M. YYYY";
+var MWORD_DT_FORMAT = "D. MMMM YYYY";
 
 module.exports = function(url, callback) {
 
@@ -15,6 +20,9 @@ module.exports = function(url, callback) {
                 if (h1s.length > 0) {
                     h1 = h1s[0].innerText;
                 }
+
+                var introducedParagraph = $('.document-log-item:nth-child(1) p')[0];
+
                 var state;
                 var states = {
                     accepted: $('.status.okx').length,     //if accepted there should be one paragraph with class status ok
@@ -33,7 +41,8 @@ module.exports = function(url, callback) {
                 var output = {
                     h1: h1,
                     state: state,
-                    readings: $('strong.highlight').length
+                    readings: $('strong.highlight').length,
+                    dateIntroduced: introducedParagraph.textContent.split('dne')[1].trim()
                 };
 
                 if (countCheck !== 1) {
@@ -84,7 +93,8 @@ module.exports = function(url, callback) {
                         name: printName,
                         state: scraped.state,
                         type: scraped.type,
-                        readings: scraped.readings
+                        readings: scraped.readings,
+                        createdOn: moment.parse(scraped.dateIntroduced, SHORT_DT_FORMAT)
                     };
                     //accepted, refused, ongoing
                     callback(printH) ;

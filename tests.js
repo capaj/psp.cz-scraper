@@ -16,6 +16,9 @@ module.exports = {
     printHistory: function (test) {
         test.equals(this.historyPassed.number, 620);
         test.equals(this.historyPassed.state, 'accepted');
+        test.equals(this.historyPassed.createdOn.date(), 29);
+        test.equals(this.historyPassed.createdOn.month(), 2);
+        test.equals(this.historyPassed.createdOn.year(), 2012);
         test.done();
     }
 };
